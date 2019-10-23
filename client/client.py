@@ -70,10 +70,13 @@ class OpsmanClient(CredentialManager):
             'Authorization': f"bearer {self._access_token}"
         })
 
-    def get_info(self):
-        """Get OpsMan api info"""
-        uri = '/info'
+    def _make_api_call(self, uri: str) -> Dict[str, Any]:
         res = self.session.get(f'{self.api_url}{uri}')
         logging.debug('%r', res)
         body = res.json()
         return body
+
+    def get_info(self):
+        """Get OpsMan api info"""
+        uri = '/info'
+        return self._make_api_call(uri)
