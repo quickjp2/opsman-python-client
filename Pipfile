@@ -15,6 +15,8 @@ requests = "*"
 
 pytest = "*"
 pylint = "*"
+pytest-cov = "*"
+mock = "*"
 
 
 [requires]
