@@ -15,7 +15,7 @@ import logging
 from typing import Dict, Any
 
 import requests
-from oauth2_client.credentials_manager import ServiceInformation, CredentialManager
+from oauth2_client.credentials_manager import ServiceInformation, CredentialManager, OAuthError
 
 
 class OpsmanClient(CredentialManager):
@@ -68,10 +68,15 @@ class OpsmanClient(CredentialManager):
                                               os.getenv('OPSMAN_CLIENT_SECRET'),
                                               [], ssl_verify)
             super(OpsmanClient, self).__init__(service_info, proxies=proxies)
-        self.init_with_client_credentials()
-        self.__session.headers.update({
-            'Authorization': f"bearer {self._access_token}"
-        })
+        try:
+            self.init_with_client_credentials()
+            self.__session.headers.update({
+                'Authorization': f"bearer {self._access_token}"
+            })
+        except requests.exceptions.ConnectionError as err:
+            raise ValueError(f'Unable to reach the provided url: {login_url}')
+        except OAuthError as err:
+            raise ValueError(err)
 
     def _make_api_call(self, verb: str, uri: str, headers: Dict[str, Any] = None,
                        params: Dict[str, Any] = None, payload: Dict[str, Any] = None
